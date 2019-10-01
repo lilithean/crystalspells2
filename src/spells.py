@@ -20,7 +20,7 @@ import numpy as np
 
 class Spells(object):
 
-    def __init(self)__:
+    def __init__(self):
 
         self.x = np.linspace(0, 1)
         self.y = [
@@ -29,4 +29,20 @@ class Spells(object):
             np.cos(self.x * 3) + 4,
         ]
 
+    def __str__(self):
+
+        tmpstr = (
+            'Data Infomation:\n'
+            + 'X min, X max             = %6.3f, %6.3f\n' % (
+                min(self.x), max(self.x)
+            )
+            + 'Y min, Y max             = %6.3f, %6.3\n'  % (
+                min(min(x) for x in self.y),
+                max(max(x) for x in self.y)
+            )
+            + 'Number of data points    = %i\n' % len(self.x)
+            + 'Number of Y lines        = %i\n' % len(self.y)
+        )
+ 
+        return tmpstr
 

@@ -71,7 +71,7 @@ class Crystal(object):
                 for x in self.ions
             )
             +'\n'
-            + '\033[92mReciprocal lattice  =\033[00m\n'
+            + '\033[92mReciprocal lattice  =\033[00m '
             + '\033[92m(in units 2pi/angstr)\033[00m\n'
             + '\n'.join(
                 (
@@ -84,10 +84,10 @@ class Crystal(object):
         )
         return tmpstr
 
-    def reciprocal(self, conv='vasp', frac=False, cart=False):
+    def reciprocal(self, conv='vasp', frac=[], cart=[]):
         """ b1 = (a2 x a3)/(a1 (a2 x a3)),
-            frac: return cart or
-            cart: return frac """
+            frac: numpy.array; return cart or
+            cart: numpy.array; return frac """
 
         conv = conv.lower()
 
@@ -101,9 +101,12 @@ class Crystal(object):
                 * np.linalg.norm(self.lattice[0])
             )
 
-        return reciprocal_lattice
-
-
+        if len(frac):
+            return np.dot(frac, reciprocal_lattice)
+        elif len(cart):
+            return np.dot(cart, np.linalg.inv(reciprocal_lattice))
+        else:
+            return reciprocal_lattice
 
     def to(self, style='vasp'):
         """ output a string of given input file """
@@ -172,6 +175,29 @@ class Crystal(object):
                 + '\n  }\n}'
             )
 
+        elif style in ('adf', 'ams'):
+            tmpstr = (
+                'System\n'
+                + '    FractionalCoords True\n'
+                + '    Atoms\n'
+                + '\n'.join(
+                    '        %s  %14.9f  %14.9f  %14.9f' % (
+                        x[0], x[1][0], x[1][1], x[1][2]
+                    )
+                    for x in self.ions
+                )
+                + '\n    End\n'
+                + '    Lattice [Angstrom]\n'
+                + '\n'.join(
+                    '    %14.9f  %14.9f  %14.9f' % (
+                        x[0], x[1], x[2]
+                    )
+                    for x in self.lattice
+                )
+                + '\n    End\n'
+                +'End'
+            )
+
         elif style in ('qe', 'espresso'):
             tmpstr = (
                 'CELL_PARAMETERS (angstrom)\n'
@@ -190,6 +216,7 @@ class Crystal(object):
                     for x in self.ions
                 )
             )
+
         else:
             tmpstr = False
 
@@ -318,6 +345,3 @@ def from_file(fpath, ftype='vasp'):
 
     return crystal
 
-print from_file(sys.argv[1], 'qe').reciprocal()
-print from_file(sys.argv[1], 'qe')
-print from_file(sys.argv[1], 'qe').to('qe')
