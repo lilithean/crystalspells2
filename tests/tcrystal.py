@@ -108,3 +108,12 @@ cart = np.array(
 print qe_cryst.reciprocal('qe', cart=cart)
 print
 
+print '- reading structure from lmto ctrl file'
+lmto_cryst = from_file('CTRL', 'lmto')
+print lmto_cryst
+print
+
+print '- reading structure from vasp poscar file'
+vasp_cryst = from_file('POSCAR', 'vasp')
+print vasp_cryst
+print
