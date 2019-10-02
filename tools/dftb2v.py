@@ -18,6 +18,9 @@ import sys
 sys.path.append(
     '/home/xwang224/crystalspells2/src'
 )
+sys.path.append(
+    '/projects/academic/ezurek/xiaoyu/crystalspells2/src'
+)
 from crystal import *
 
 with open('CONTCAR', 'w') as fid:
