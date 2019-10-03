@@ -37,3 +37,4 @@ except:
                 print 'unsupported structure file'
                 sys.exit(-1)
 
+

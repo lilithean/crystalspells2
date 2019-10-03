@@ -11,7 +11,7 @@
 #
 #    "hull.py"
 #
-#    This is the data structure to calculate convexhull for a set of
+#    This is the function to calculate convexhull for a set of
 #    crystals and energies
 #
 
