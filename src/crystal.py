@@ -88,8 +88,11 @@ class Crystal(object):
                     for x in self.reciprocal()
                 )
             )
+            + '\n'
         )
         return tmpstr
+
+
 
     def reciprocal(self, conv='vasp', frac=[], cart=[]):
         """ b1 = (a2 x a3)/(a1 (a2 x a3)),
@@ -115,25 +118,26 @@ class Crystal(object):
         else:
             return reciprocal_lattice
 
-    def to(self, style='vasp'):
-        """ output a string of given input file """
-
-        style = style.lower()
-
-        elements = [x[0] for x in self.ions]
+    def elements(self):
+        symbols = [x[0] for x in self.ions]
         #     funny fact: list comprehension is the fastest way
         # see https://stackoverflow.com/a/48157038
-
-        elements_count = zip(
+        #     the built-in set function returns an unordered set
+        return zip(
             *sorted(
                 [
-                    [x, elements.count(x)]
-                    for x in set(elements)
+                    [x, symbols.count(x)]
+                    for x in set(symbols)
                 ],
                 key = lambda y: y[0]
             )
         )
-        #     the built-in set function returns an unordered set
+
+    def to(self, style='vasp'):
+        """ output a string of given input file """
+
+        style = style.lower()
+        elements = self.elements()
 
         if style in ('vasp', 'poscar', 'contcar'):
             tmpstr = (
@@ -144,9 +148,9 @@ class Crystal(object):
                     for x in self.lattice
                 )
                 + '\n'
-                + '  '.join('%3s' % x for x in elements_count[0])
+                + '  '.join('%3s' % x for x in elements[0])
                 + '\n  '
-                + '  '.join('%3i' % x for x in elements_count[1])
+                + '  '.join('%3i' % x for x in elements[1])
                 + '\nDirect\n'
                 + '\n'.join(
                     '  %14.10f  %14.10f  %14.10f' % (
@@ -160,12 +164,12 @@ class Crystal(object):
             tmpstr = (
                 'Geometry = {\n'
                 + '  TypeNames = {'
-                + ' '.join('"%s"' % x for x in elements_count[0])
+                + ' '.join('"%s"' % x for x in elements[0])
                 + '}\n'
                 + '  TypesAndCoordinates [relative] = {\n'
                 + '\n'.join(
                     '    %i %9.6f %9.6f %9.6f' % (
-                        elements_count[0].index(x[0]) + 1,
+                        elements[0].index(x[0]) + 1,
                         x[1][0], x[1][1], x[1][2]
                     )
                     for x in self.ions
@@ -346,12 +350,12 @@ def from_file(fpath, ftype='vasp'):
             ]
         )
 
-    if ftype in ('lmto', 'tb-lmto-asa'):
+    if ftype in ('lmto', 'ctrl'):
         istruc = next(
             x for x, y in enumerate(tmpdata) if 'STRUC' in y
         )
         alat = (
-            float(tmpdata[istruc].split('=')[-1]) 
+            float(tmpdata[istruc].split('=')[-1])
             * _BOHR_TO_ANGSTR
         )
         try:
@@ -366,7 +370,7 @@ def from_file(fpath, ftype='vasp'):
             sys.exit(-1)
         crystal.ions = [
             [
-                w.strip('0123456789'), 
+                w.strip('0123456789'),
                 np.matmul(
                     np.array([float(x), float(y), float(z)]),
                     np.linalg.inv(crystal.lattice) * alat
