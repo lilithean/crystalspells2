@@ -9,10 +9,10 @@
 #
 #    Fall 2019
 #
-#    "dataset.py"
+#    "ensemble.py"
 #
-#    This is the datastructure to store and manipulate a set of
-#    crystal and their properties, supporting output from XtalOpt
+#    This is the datastructure to store and manipulate a collection
+#    of crystals and their properties
 #
 
 
@@ -27,21 +27,41 @@ sys.path.append(
 )
 from crystal import from_file
 
-class DataSet(object):
+class Ensemble(object):
 
     def __init__(self):
-        self.dataset = []
+        """
+            Each entry in Ensemble is, currently:
+            [
+                crystal,
+                enthalpy,
+            ]
 
-def from_xtalopt(dpath):
+        """
 
-    ds = DataSet()
+        self.ensemble = []
 
-    xtaldirs = filter(
-        lambda x: os.path.isdir(os.path.join(dpath, x)), 
+    def convex_hull(self, reference=None):
+
+        elements = list(
+            set().union(
+                x[0].elements()[0] for x in self.ensemble
+            )
+        )
+        return elements
+
+
+
+def from_directory(dpath):
+
+    collection = Ensemble()
+
+    subdirs = filter(
+        lambda x: os.path.isdir(os.path.join(dpath, x)),
         os.listdir(dpath)
     )
 
-    for i in xtaldirs:
+    for i in subdirs:
         try:
             crystal = from_file(i+'/CONTCAR', 'vasp')
         except:
@@ -58,8 +78,7 @@ def from_xtalopt(dpath):
             except:
                     print 'Error reading enthalpy in folder %s' %i
             else:
-                ds.dataset.append([crystal, enthalpy])
+                collection.ensemble.append([crystal, enthalpy])
 
-    return ds
+    return collection
 
-print from_xtalopt(sys.argv[1])
