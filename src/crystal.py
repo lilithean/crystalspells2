@@ -59,7 +59,7 @@ class Crystal(object):
                 np.linalg.norm(self.lattice[1]),
                 np.linalg.norm(self.lattice[2])
             )
-            + 'alpha, beta, gamma  = %8.1f %8.1f %8.1f\n' % (
+            + 'alpha, beta, gamma  = %8.3f %8.3f %8.3f\n' % (
                 1 - distance.cosine(self.lattice[0], self.lattice[2]),
                 1 - distance.cosine(self.lattice[1], self.lattice[2]),
                 1 - distance.cosine(self.lattice[0], self.lattice[1])
