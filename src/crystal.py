@@ -47,32 +47,25 @@ class Crystal(object):
             + '\033[91mLattice vector      =\033[00m\n'
             + '\n'.join(
                 (
-                    '\033[91m    %8.3f %8.3f %8.3f\033[00m' % (
+                    '\033[91m    %8.5f %8.5f %8.5f\033[00m' % (
                         x[0], x[1], x[2]
                     )
                     for x in self.lattice
                 )
             )
             +'\n'
-            + 'a, b, c             = %8.3f %8.3f %8.3f\n' % (
-	        np.linalg.norm(self.lattice[0]),
-                np.linalg.norm(self.lattice[1]),
-                np.linalg.norm(self.lattice[2])
+            + 'a, b, c             = %8.5f %8.5f %8.5f\n' % (
+                self.lat_const(0), self.lat_const(1), self.lat_const(2)
             )
-            + 'alpha, beta, gamma  = %8.3f %8.3f %8.3f\n' % (
+            + 'alpha, beta, gamma  = %8.5f %8.5f %8.5f\n' % (
                 1 - distance.cosine(self.lattice[0], self.lattice[2]),
                 1 - distance.cosine(self.lattice[1], self.lattice[2]),
                 1 - distance.cosine(self.lattice[0], self.lattice[1])
             )
-            + 'volume              = %8.3f\n' % (
-                np.dot(
-                    self.lattice[0],
-                    np.cross(self.lattice[1], self.lattice[2])
-                )
-            )
+            + 'volume              = %8.5f\n' % (self.volume())
             + '\033[94mIons                =\033[00m\n'
             + '\n'.join(
-                '\033[94m    %4s %8.3f %8.3f %8.3f\033[00m' % (
+                '\033[94m    %4s %8.5f %8.5f %8.5f\033[00m' % (
                     x[0], x[1][0], x[1][1], x[1][2]
                 )
                 for x in self.ions
@@ -92,7 +85,41 @@ class Crystal(object):
         )
         return tmpstr
 
+    def volume(self):
+        return np.dot(
+            self.lattice[0], np.cross(self.lattice[1], self.lattice[2])
+        )
 
+    def lat_const(self, i):
+        return np.linalg.norm(self.lattice[i])
+
+
+    def rescale(self, volume):
+        new_crystal = Crystal()
+        new_crystal.ions = self.ions
+        scale = np.cbrt(volume/self.volume())
+        new_crystal.lattice = self.lattice * scale 
+        return new_crystal
+
+    def redo_a_c(self, ratio):
+        new_crystal = Crystal()
+        new_crystal.ions = self.ions
+        # c'/b' = ratio; c'/a' = ratio; a'b'c' = abc
+        # c'/ratio x c'/ratio x c' = abc
+        # c' = (abc * ratio^2)^(1/3)
+        c_prime = np.cbrt(
+            self.lat_const(0) * self.lat_const(1) * self.lat_const(2) 
+            * ratio**2.
+        )
+        a_prime = c_prime / ratio
+        new_crystal.lattice = np.array(
+            [
+                self.lattice[0] / self.lat_const(0) * a_prime,
+                self.lattice[1] / self.lat_const(1) * a_prime,
+                self.lattice[2] / self.lat_const(2) * c_prime
+            ]
+        )
+        return new_crystal
 
     def reciprocal(self, conv='vasp', frac=[], cart=[]):
         """ b1 = (a2 x a3)/(a1 (a2 x a3)),
@@ -247,6 +274,9 @@ def from_file(fpath, ftype='vasp'):
     ftype = ftype.lower()
     crystal = Crystal()
 
+
+
+
     if ftype in ('vasp', 'poscar', 'contcar'):
         scale = float(tmpdata[1])
         crystal.lattice = np.array(
@@ -283,7 +313,7 @@ def from_file(fpath, ftype='vasp'):
                 elements,
                 [
                     np.matmul(
-                        np.array([float(x)*scale for x in y.split()]),
+                        np.array([float(x)*scale for x in y.split()[:3]]),
                         np.linalg.inv(crystal.lattice)
                     )
                     for y in tmpdata[i+1:i+sum(nion)+1]
@@ -292,7 +322,7 @@ def from_file(fpath, ftype='vasp'):
         else:
             crystal.ions = zip(
                 elements, [
-                    np.array([float(x) for x in y.split()])
+                    np.array([float(x) for x in y.split()[:3]])
                     for y in tmpdata[i+1:i+sum(nion)+1]
                 ]
             )

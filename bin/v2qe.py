@@ -9,19 +9,17 @@
 #
 #    Fall 2019
 #
-#    "tcrystal.py"
+#    "icryst.py"
 #
-#    Test functions in crystal.py
-
+#    A quick tool to check crystal information
 
 import sys
-import numpy as np
 sys.path.append(
     '/home/xwang224/crystalspells2/src'
 )
 sys.path.append(
     '/projects/academic/ezurek/xiaoyu/crystalspells2/src'
 )
-from ensemble import from_directory
+from crystal import from_file
 
-print from_directory(sys.argv[1]).convex_hull()
+print from_file(sys.argv[1], 'vasp').to('qe')

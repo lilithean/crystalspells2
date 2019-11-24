@@ -27,30 +27,48 @@ sys.path.append(
 )
 from crystal import from_file
 
-class Ensemble(object):
+class Hull(object):
 
     def __init__(self):
-        """
-            Each entry in Ensemble is, currently:
+        # [elements, nref, eV/FU]
+        self.reference = [
+            ['F', 2.,  35.44],
+            ['Y', 1., 121.31],
+            ['I', 3., 241.60],
+        ]
+        # [x, y, eV/atom]
+        self.hulldata = np.array(
             [
-                crystal,
-                enthalpy,
-            ]
-
-        """
-
-        self.ensemble = []
-
-    def convex_hull(self, reference=None):
-
-        elements = list(
-            set().union(
-                x[0].elements()[0] for x in self.ensemble
-            )
+                [0.100, 0.333, 128.63],
+                [0.250, 0.666,  32.51],
+                [0.750, 0.375,  30.66],
+            ]  
         )
-        return elements
 
+    def position(self, data):
+        # data = [n1, n2, n3]
+        ratio = 
 
+        return
+
+    def formation_enthalpy(self, data):
+        # data = [n1, n2, n3, eV/FU]
+        # reaction = n1/nref1 A_nref1 
+        #          + n2/nref2 B_nref2 
+        #          + n3/nref3 C_nref3
+        #          -> A_n1 B_n2 C_n3
+        # formation_enthalpy = [H 
+        #                    - (n1/nref1)*H1
+        #                    - (n2/nref2)*H2
+        #                    - (n3/nref3)*H3
+        #                    ] / (n1 + n2 + n3)
+        # in eV/atom    
+        return (
+            data[3]
+            - self.reference[0][1]/data[0] * self.reference[0][2]
+            - self.reference[1][1]/data[1] * self.reference[1][2]
+            - self.reference[2][1]/data[2] * self.reference[2][2]
+        )/(data[0] + data[1] + data[2])
 
 def from_directory(dpath):
 

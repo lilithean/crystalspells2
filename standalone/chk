@@ -1,0 +1,43 @@
+#!/bin/sh
+#
+#   "Check Status Of Your Jobs" Tool
+#
+#   Xiaoyu Wang (xwang224@buffalo.edu)
+#   Dept. of Chem., State Univ. of New York at Buffalo
+#   Jan. 2019
+#
+# ------ Version History ------
+#   ver 1.0 (Jan 01 2019) Write a lot of things just for fun 
+#   ver 1.1 (Nov 22 2019) Add more options
+
+set -eu -o pipefail
+
+
+function usage() {
+  printf '%s\n' \
+    "Usage: chk [options]" \
+    'Show the last line of all files in current directory and' \
+    'The last line is displayed if the file name matches.' \
+    '' \
+    "Options:" \
+    '    -f FILENAME' \
+    '        FILENAME to check, default is "job.out"' \
+    '' \
+    '    -g FLAG' \
+    '        grep lines with FLAG instead of last line' \
+    ''
+}
+
+function err() {
+  printf "${FUNCNAME[1]} > ERROR MSG > $@" >&2
+}
+
+function printpt() {
+  printf "${FUNCNAME[1]} > ERROR MSG > $@" 
+}
+
+function tail_it() {
+  find . -name "${file_name}" -printf "\033[34m%h\033[0m \t" \
+     -exec tail -n1 "{}" \;  
+}
+
