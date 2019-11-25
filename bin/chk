@@ -13,10 +13,10 @@
 
 set -eu -o pipefail
 
-
+# global variables specification
 _FILE_NAME='job.out'
 _GREP_PATTERN=false
-
+_OUTPUT_FORMAT="%s\t  %s\n"
 
 function usage() {
   printf '%s\n' \
@@ -37,20 +37,21 @@ function err() {
   printf "${FUNCNAME[1]} > ERROR MSG > $@" >&2
 }
 
-function output_size() {
+function format_output() {
   local __length=-1
   for x in ${1[@]}; do
-    if [ ${#x} -gt $__length ]; then 
-      __length=${#x} 
+    [ ${#x} -gt $__length ] && __length=${#x} 
     fi
   done
-  echo $_length 
+  _OUTPUT_FORMAT="\033[34m%-{_length}s\033[0m  %s\n"
 }
 
 function chk() {
   __target_files=($(find . -name "$_FILE_NAME"))
-  __output_size=$(output_size _target_files)
-
+  format_output
+  for x in ${__target_files[@]}; do
+    printf "$_OUTPUT_FORMAT" $(ls x) $(tail -1 x)
+  done
 }
 
 function tail_it() {
