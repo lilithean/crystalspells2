@@ -9,8 +9,13 @@
 # ------ Version History ------
 #   ver 1.0 (Jan 01 2019) Write a lot of things just for fun 
 #   ver 1.1 (Nov 22 2019) Add more options
+#   ver 2.0 (Nov 24 2019) Rewrite the whole thing into function style
 
 set -eu -o pipefail
+
+
+_FILE_NAME='job.out'
+_GREP_PATTERN=false
 
 
 function usage() {
@@ -32,8 +37,20 @@ function err() {
   printf "${FUNCNAME[1]} > ERROR MSG > $@" >&2
 }
 
-function printpt() {
-  printf "${FUNCNAME[1]} > ERROR MSG > $@" 
+function output_size() {
+  local __length=-1
+  for x in ${1[@]}; do
+    if [ ${#x} -gt $__length ]; then 
+      __length=${#x} 
+    fi
+  done
+  echo $_length 
+}
+
+function chk() {
+  __target_files=($(find . -name "$_FILE_NAME"))
+  __output_size=$(output_size _target_files)
+
 }
 
 function tail_it() {
@@ -41,3 +58,4 @@ function tail_it() {
      -exec tail -n1 "{}" \;  
 }
 
+chk
