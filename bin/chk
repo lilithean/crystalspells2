@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 #   "Check Status Of Your Jobs" Tool
 #
@@ -7,7 +7,7 @@
 #   Jan. 2019
 #
 # ------ Version History ------
-#   ver 1.0 (Jan 01 2019) Write a lot of things just for fun 
+#   ver 1.0 (Jan 01 2019) Write a lot of things just for fun
 #   ver 1.1 (Nov 22 2019) Add more options
 #   ver 2.0 (Nov 24 2019) Rewrite the whole thing into function style
 
@@ -15,7 +15,7 @@ set -eu -o pipefail
 
 # global variables specification
 _FILE_NAME='job.out'
-_GREP_PATTERN=false
+_GREP_FLAG=false
 _OUTPUT_FORMAT="%s\t  %s\n"
 
 function usage() {
@@ -39,24 +39,27 @@ function err() {
 
 function format_output() {
   local __length=-1
-  for x in ${1[@]}; do
-    [ ${#x} -gt $__length ] && __length=${#x} 
-    fi
+  local __array=("$@")
+  for x in "${__array[@]}"; do
+    [ "${#x}" -gt $__length ] && __length="${#x}"
   done
-  _OUTPUT_FORMAT="\033[34m%-{_length}s\033[0m  %s\n"
+  _OUTPUT_FORMAT="\033[34m%-${__length}s\033[0m -> %s\n"
 }
 
 function chk() {
-  __target_files=($(find . -name "$_FILE_NAME"))
-  format_output
-  for x in ${__target_files[@]}; do
-    printf "$_OUTPUT_FORMAT" $(ls x) $(tail -1 x)
+  local __target_files=($(find . -name "$_FILE_NAME"))
+  format_output "${__target_files[@]}"
+  for x in "${__target_files[@]}"; do
+    printf "$_OUTPUT_FORMAT" "$(ls $x)" "$(tail -1 $x)"
   done
 }
 
-function tail_it() {
-  find . -name "${file_name}" -printf "\033[34m%h\033[0m \t" \
-     -exec tail -n1 "{}" \;  
-}
+while getopts "f:g:" opt; do
+  case "$opt" in
+    f) _FILE_NAME="$OPTARG";;
+    g) _GREP_FLAG="$OPTARG";;
+    *) usage; exit 0;;
+  esac
+done
 
 chk
