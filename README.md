@@ -2,4 +2,4 @@
 
 1. Exectuables are usually under ```/bin```
 
-   - ```/bin/chk```: A small bash tool to check the status of many jobs. The file explains itself.
+   - ```/bin/chk```: A small bash tool to check many files. (```find``` every files with the given ```$FILENAME```, then ```tail``` the last line or ```grep``` the last occurance of a given flag). The file should explain itself.
