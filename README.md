@@ -1,5 +1,5 @@
 # crystalspells2
 
-## utitlities:
+1. utitlities:
 
-/bin/chk: a small bash tool to check the status of many jobs. The file explains itself.
+- __/bin/chk__: A small bash tool to check the status of many jobs. The file explains itself.
