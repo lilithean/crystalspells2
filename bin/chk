@@ -20,6 +20,8 @@ REFORMAT_OUTPUT=true
 OUTPUT_FORMAT="%s\t  %s\n"
 COLUMN=0
 HIDE_PATH=false
+MAXDEPTH=100
+GREP=false
 
 function usage() {
   printf '%s\n' \
@@ -38,9 +40,13 @@ function usage() {
     '' \
     '    -g FLAG' \
     '        grep last FLAG instead of show last line' \
+    '        note: if the FLAG is not found, the last line will be printed.'\
     '' \
     '    -n' \
     '        do not reformat the output string' \
+    '' \
+    '    -r' \
+    '        do not search subdirectories' \
     '' \
     '    -s' \
     '        hide the path' \
@@ -62,30 +68,33 @@ function format_output() {
 }
 
 function chk() {
-  local target_files=($(find . -name "$FILENAME"))
+  local target_files=($(find .  -maxdepth "$MAXDEPTH" -name "$FILENAME"))
   [ ${#target_files[@]} -eq 0 ] && {
     err "No such files in the directory: $FILENAME \n"
     exit 1
   }
   "$REFORMAT_OUTPUT" && format_output "${target_files[@]}"
   for x in "${target_files[@]}"; do
-    if [ -z "$FLAG" ]; then
-      info=$(tail -1 $x| awk "{print  $ $COLUMN}") 
-    else
+    $GREP && {
       info=$(grep "$FLAG" $x | tail -1 | awk "{print $ $COLUMN}")
-    fi
-    $HIDE_PATH && printf "$info\n" || {
+    } || {
+      info=$(tail -1 $x| awk "{print  $ $COLUMN}") 
+    }
+    $HIDE_PATH && {
+      printf "$info\n"
+    } || {
       printf "$OUTPUT_FORMAT" "$(ls $x)" "$info"
     }
   done
 }
 
-while getopts "c:f:g:ns" opt; do
+while getopts "c:f:g:nrs" opt; do
   case "$opt" in
     c) COLUMN="$OPTARG";;
     f) FILENAME="$OPTARG";;
-    g) FLAG="$OPTARG";;
+    g) FLAG="$OPTARG"; GREP=true;;
     n) REFORMAT_OUTPUT=false;;
+    r) MAXDEPTH=1;;
     s) HIDE_PATH=true;;
     *) usage; exit 0;;
   esac

@@ -57,6 +57,9 @@ class Crystal(object):
             + 'a, b, c             = %8.5f %8.5f %8.5f\n' % (
                 self.lat_const(0), self.lat_const(1), self.lat_const(2)
             )
+            + 'c/a                 = %8.5f\n' % (
+                self.lat_const(2)/self.lat_const(0)
+            )    
             + 'alpha, beta, gamma  = %8.5f %8.5f %8.5f\n' % (
                 1 - distance.cosine(self.lattice[0], self.lattice[2]),
                 1 - distance.cosine(self.lattice[1], self.lattice[2]),
